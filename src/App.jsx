@@ -1,18 +1,21 @@
 import React from 'react';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import { ReactAI, withAITracking } from "react-appinsights";
+import { Router } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import './App.css';
 
+const history = createBrowserHistory()
 let INSTRUMENTATION_KEY = '4a795cb3-5b9e-4428-8777-0441b7ae7dc8'; // Enter your instrumentation key here
 
-let appInsights = new ApplicationInsights({config: {
+ReactAI.initialize({
   instrumentationKey: INSTRUMENTATION_KEY,
-  maxBatchInterval: 0
-}});
-appInsights.loadAppInsights();
+  maxBatchInterval: 0,
+  history: history 
+});
+var appInsights = ReactAI.rootInstance;
+
 class App extends React.Component {
-  componentDidMount() {
-    appInsights.trackPageView({name: 'App Mounted'});
-  }
 
   trackException() {
     appInsights.trackException({error: new Error('some error'), severityLevel: SeverityLevel.Error});
@@ -40,15 +43,17 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App">
-        <button onClick={this.trackException}>Track Exception</button>
-        <button onClick={this.trackEvent}>Track Event</button>
-        <button onClick={this.trackTrace}>Track Trace</button>
-        <button onClick={this.throwError}>Autocollect an Error</button>
-        <button onClick={this.ajaxRequest}>Autocollect a request</button>
-      </div>
+      <Router history={history}>
+        <div className="App">
+          <button onClick={this.trackException}>Track Exception</button>
+          <button onClick={this.trackEvent}>Track Event</button>
+          <button onClick={this.trackTrace}>Track Trace</button>
+          <button onClick={this.throwError}>Autocollect an Error</button>
+          <button onClick={this.ajaxRequest}>Autocollect a request</button>
+        </div>
+      </Router>
     );
   }
 }
 
-export default App;
+export default withAITracking(App);
