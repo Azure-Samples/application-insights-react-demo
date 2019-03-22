@@ -6,7 +6,8 @@ let INSTRUMENTATION_KEY = '4a795cb3-5b9e-4428-8777-0441b7ae7dc8'; // Enter your 
 
 let appInsights = new ApplicationInsights({config: {
   instrumentationKey: INSTRUMENTATION_KEY,
-  maxBatchInterval: 0
+  maxBatchInterval: 0,
+  disableFetchTracking: false
 }});
 appInsights.loadAppInsights();
 class App extends React.Component {
@@ -38,6 +39,10 @@ class App extends React.Component {
     xhr.send();
   }
 
+  fetchRequest() {
+    fetch('https://httpbin.org/status/200');
+  }
+
   render() {
     return (
       <div className="App">
@@ -45,7 +50,8 @@ class App extends React.Component {
         <button onClick={this.trackEvent}>Track Event</button>
         <button onClick={this.trackTrace}>Track Trace</button>
         <button onClick={this.throwError}>Autocollect an Error</button>
-        <button onClick={this.ajaxRequest}>Autocollect a request</button>
+        <button onClick={this.ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
+        <button onClick={this.ajaxRequest}>Autocollect a dependency (Fetch)</button>
       </div>
     );
   }
