@@ -1,30 +1,22 @@
 import React from 'react';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import TestComponent from './TestComponent';
+import { ai } from './AITelemetry';
 import './App.css';
 
-let INSTRUMENTATION_KEY = '4a795cb3-5b9e-4428-8777-0441b7ae7dc8'; // Enter your instrumentation key here
-
-let appInsights = new ApplicationInsights({config: {
-  instrumentationKey: INSTRUMENTATION_KEY,
-  maxBatchInterval: 0,
-  disableFetchTracking: false
-}});
-appInsights.loadAppInsights();
 class App extends React.Component {
-  componentDidMount() {
-    appInsights.trackPageView({name: 'App Mounted'});
-  }
 
   trackException() {
-    appInsights.trackException({error: new Error('some error'), severityLevel: SeverityLevel.Error});
+    ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
   }
 
   trackTrace() {
-    appInsights.trackTrace({message: 'some trace', severityLevel: SeverityLevel.Information});
+    ai.appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
   }
 
   trackEvent() {
-    appInsights.trackEvent({name: 'some event'});
+    ai.appInsights.trackEvent({ name: 'some event' });
   }
 
   throwError() {
@@ -44,15 +36,55 @@ class App extends React.Component {
   }
 
   render() {
-    return (
+    return (<div>
+      <div >
+        <Header />
+        <Route exact path="/" component={Home} />
+        <Route path="/about" component={About} />
+      </div>
       <div className="App">
         <button onClick={this.trackException}>Track Exception</button>
         <button onClick={this.trackEvent}>Track Event</button>
         <button onClick={this.trackTrace}>Track Trace</button>
         <button onClick={this.throwError}>Autocollect an Error</button>
         <button onClick={this.ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
-        <button onClick={this.ajaxRequest}>Autocollect a dependency (Fetch)</button>
+        <button onClick={this.fetchRequest}>Autocollect a dependency (Fetch)</button>
       </div>
+    </div>
+    );
+  }
+}
+
+class Home extends React.Component {
+  render() {
+    return <div>
+      <h2>Home Page</h2>
+      <TestComponent />
+    </div>;
+  }
+}
+
+
+class About extends React.Component {
+  render() {
+    return <div>
+      <h2>About Page</h2>
+      <TestComponent />
+    </div>;
+  }
+}
+
+class Header extends React.Component {
+  render() {
+    return (
+      <ul>
+        <li>
+          <Link to="/">Home</Link>
+        </li>
+        <li>
+          <Link to="/about">About</Link>
+        </li>
+      </ul >
     );
   }
 }
