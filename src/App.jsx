@@ -6,7 +6,7 @@ import { ai } from './AITelemetry';
 import './App.css';
 
 class App extends React.Component {
-
+ 
   trackException() {
     ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
   }

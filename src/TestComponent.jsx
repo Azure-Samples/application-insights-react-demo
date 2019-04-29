@@ -9,7 +9,7 @@ class TestComponent extends React.Component {
             <div className="App">
                 Test Component
           </div>
-        );
+        ); 
     }
 }
 
