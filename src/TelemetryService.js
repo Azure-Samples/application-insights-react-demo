@@ -1,7 +1,7 @@
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 
-class AITelemetry {
+class TelemetryService {
 
     constructor() {
         this.reactPlugin = new ReactPlugin();
@@ -25,4 +25,4 @@ class AITelemetry {
     }
 }
 
-export let ai = new AITelemetry();
+export let ai = new TelemetryService();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
-import { ai } from './AITelemetry';
+import { ai } from './TelemetryService';
 
 class TestComponent extends React.Component {
 

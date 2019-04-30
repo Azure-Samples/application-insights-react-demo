@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { Router } from 'react-router-dom';
 import { createBrowserHistory } from "history";
-import { ai } from './AITelemetry';
+import { ai } from './TelemetryService';
 
 const history = createBrowserHistory({ basename: '' });
 

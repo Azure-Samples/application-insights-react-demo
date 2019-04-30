@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@microsoft/applicationinsights-react-js": "^2.0.0-rc.4",
+    "@microsoft/applicationinsights-react-js": "^2.0.0-rc5",
     "@microsoft/applicationinsights-web": "^2.0.0-rc.4",
     "history": "^4.9.0",
     "react": "^16.8.4",

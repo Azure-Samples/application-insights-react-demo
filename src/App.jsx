@@ -2,7 +2,7 @@ import React from 'react';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import TestComponent from './TestComponent';
-import { ai } from './AITelemetry';
+import { ai } from './TelemetryService';
 import './App.css';
 
 class App extends React.Component {
