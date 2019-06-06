@@ -1,12 +1,16 @@
 import React from 'react';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Router, Route, Link } from "react-router-dom";
 import TestComponent from './TestComponent';
-import { ai } from './TelemetryService';
 import './App.css';
+import { createBrowserHistory } from "history";
+import { ai } from './TelemetryService';
+
+const history = createBrowserHistory({ basename: '' });
+ai.initialize({ history: history });
 
 class App extends React.Component {
- 
+
   trackException() {
     ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
   }
@@ -36,7 +40,7 @@ class App extends React.Component {
   }
 
   render() {
-    return (<div>
+    return (<Router history={history}>
       <div >
         <Header />
         <Route exact path="/" component={Home} />
@@ -50,7 +54,7 @@ class App extends React.Component {
         <button onClick={this.ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
         <button onClick={this.fetchRequest}>Autocollect a dependency (Fetch)</button>
       </div>
-    </div>
+    </Router>
     );
   }
 }
