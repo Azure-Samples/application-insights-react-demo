@@ -1,4 +1,5 @@
 # Microsoft Application Insights JavaScript SDK V2 (Beta) Sample
+[![Build Status](https://travis-ci.org/Azure-Samples/application-insights-react-demo.svg?branch=master)](https://travis-ci.org/Azure-Samples/application-insights-react-demo)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 > *Note:* Only [**App.jsx**](./src/App.jsx) was modified in this repo for the **Application Insights Demo**
