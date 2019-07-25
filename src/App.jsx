@@ -24,9 +24,12 @@ class App extends React.Component {
   }
 
   throwError() {
+    let foo = {
+      field: { bar: 'value' }
+    };
+    
     // This will crash the app; the error will show up in the Azure Portal
-    let foo = window['a']['b'];
-    console.log(foo);
+    return foo.fielld.bar;
   }
 
   ajaxRequest() {
