@@ -1,7 +1,7 @@
 ---
 page_type: sample
 languages:
-- javasript
+- javascript
 - html
 products:
 - azure
