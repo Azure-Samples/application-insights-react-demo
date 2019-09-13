@@ -1,3 +1,14 @@
+---
+page_type: sample
+languages:
+- javasript
+- html
+products:
+- azure
+description: "Microsoft Application Insights JavaScript SDK V2 (Beta) Sample"
+urlFragment: application-insights-react-demo
+---
+
 # Microsoft Application Insights JavaScript SDK V2 (Beta) Sample
 [![Build Status](https://travis-ci.org/Azure-Samples/application-insights-react-demo.svg?branch=master)](https://travis-ci.org/Azure-Samples/application-insights-react-demo)
 
