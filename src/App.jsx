@@ -1,99 +1,85 @@
 import React from 'react';
-import { SeverityLevel } from '@microsoft/applicationinsights-web';
-import { Router, Route, Link } from "react-router-dom";
-import TestComponent from './TestComponent';
+import {BrowserRouter, Link, Route} from 'react-router-dom';
+import {SeverityLevel} from '@microsoft/applicationinsights-web';
 import './App.css';
-import { createBrowserHistory } from "history";
-import { ai } from './TelemetryService';
+import {ai} from './TelemetryService';
+import TelemetryProvider from './telemetry-provider';
 
-const history = createBrowserHistory({ basename: '' });
-ai.initialize({ history: history });
+const Home = () => (
+    <div>
+        <h2>Home Page</h2>
+    </div>
+);
 
-class App extends React.Component {
+const About = () => (
+    <div>
+        <h2>About Page</h2>
+    </div>
+);
 
-  trackException() {
-    ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
-  }
+const Header = () => (
+    <ul>
+        <li>
+            <Link to="/">Home</Link>
+        </li>
+        <li>
+            <Link to="/about">About</Link>
+        </li>
+    </ul>
+);
 
-  trackTrace() {
-    ai.appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
-  }
+const App = () => {
 
-  trackEvent() {
-    ai.appInsights.trackEvent({ name: 'some event' });
-  }
+    function trackException() {
+        ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
+    }
 
-  throwError() {
-    let foo = {
-      field: { bar: 'value' }
-    };
-    
-    // This will crash the app; the error will show up in the Azure Portal
-    return foo.fielld.bar;
-  }
+    function trackTrace() {
+        ai.appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
+    }
 
-  ajaxRequest() {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://httpbin.org/status/200');
-    xhr.send();
-  }
+    function trackEvent() {
+        ai.appInsights.trackEvent({ name: 'some event' });
+    }
 
-  fetchRequest() {
-    fetch('https://httpbin.org/status/200');
-  }
+    function throwError() {
+        let foo = {
+            field: { bar: 'value' }
+        };
 
-  render() {
-    return (<Router history={history}>
-      <div >
-        <Header />
-        <Route exact path="/" component={Home} />
-        <Route path="/about" component={About} />
-      </div>
-      <div className="App">
-        <button onClick={this.trackException}>Track Exception</button>
-        <button onClick={this.trackEvent}>Track Event</button>
-        <button onClick={this.trackTrace}>Track Trace</button>
-        <button onClick={this.throwError}>Autocollect an Error</button>
-        <button onClick={this.ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
-        <button onClick={this.fetchRequest}>Autocollect a dependency (Fetch)</button>
-      </div>
-    </Router>
-    );
-  }
-}
+        // This will crash the app; the error will show up in the Azure Portal
+        return foo.fielld.bar;
+    }
 
-class Home extends React.Component {
-  render() {
-    return <div>
-      <h2>Home Page</h2>
-      <TestComponent />
-    </div>;
-  }
-}
+    function ajaxRequest() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://httpbin.org/status/200');
+        xhr.send();
+    }
 
+    function fetchRequest() {
+        fetch('https://httpbin.org/status/200');
+    }
 
-class About extends React.Component {
-  render() {
-    return <div>
-      <h2>About Page</h2>
-      <TestComponent />
-    </div>;
-  }
-}
-
-class Header extends React.Component {
-  render() {
     return (
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/about">About</Link>
-        </li>
-      </ul >
+      <BrowserRouter>
+        <TelemetryProvider>
+          <div >
+            <Header />
+            <Route exact path="/" component={Home} />
+            <Route path="/about" component={About} />
+          </div>
+          <div className="App">
+            <button onClick={trackException}>Track Exception</button>
+            <button onClick={trackEvent}>Track Event</button>
+            <button onClick={trackTrace}>Track Trace</button>
+            <button onClick={throwError}>Autocollect an Error</button>
+            <button onClick={ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
+            <button onClick={fetchRequest}>Autocollect a dependency (Fetch)</button>
+          </div>
+        </TelemetryProvider>
+      </BrowserRouter>
     );
-  }
-}
+};
 
 export default App;
