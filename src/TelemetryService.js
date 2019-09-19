@@ -1,28 +1,45 @@
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
+import {ApplicationInsights} from '@microsoft/applicationinsights-web';
+import {ReactPlugin} from '@microsoft/applicationinsights-react-js';
 
-class TelemetryService {
+/**
+ * Create the App Insights Telemetry Service
+ * @return {{reactPlugin: ReactPlugin, appInsights: Object, initialize: Function}} - Object
+ */
+const createTelemetryService = () => {
+    let reactPlugin = null;
+    let appInsights = null;
 
-    constructor() {
-        this.reactPlugin = new ReactPlugin();
-    }
+    /**
+     * Initialize the Application Insights class
+     * @param {string} instrumentationKey - Application Insights Instrumentation Key
+     * @param {Object} browserHistory - client's browser history, supplied by the withRouter HOC
+     * @return {void}
+     */
+    const initialize = (instrumentationKey, browserHistory) => {
+        if (!instrumentationKey || !browserHistory) {
+            throw new Error('Could not initialize Telemetry Service');
+        }
 
-    initialize(reactPluginConfig) {
-        let INSTRUMENTATION_KEY = 'YOUR_IKEY'; // Enter your instrumentation key here
-        
-        this.appInsights = new ApplicationInsights({
+        reactPlugin = new ReactPlugin();
+
+        appInsights = new ApplicationInsights({
             config: {
-                instrumentationKey: INSTRUMENTATION_KEY,
+                instrumentationKey: instrumentationKey,
                 maxBatchInterval: 0,
                 disableFetchTracking: false,
-                extensions: [this.reactPlugin],
+                extensions: [reactPlugin],
                 extensionConfig: {
-                    [this.reactPlugin.identifier]: reactPluginConfig
+                    [reactPlugin.identifier]: {
+                        history: browserHistory
+                    }
                 }
             }
         });
-        this.appInsights.loadAppInsights();
-    }
-}
 
-export let ai = new TelemetryService();
+        appInsights.loadAppInsights();
+    };
+
+    return {reactPlugin, appInsights, initialize};
+};
+
+export const ai = createTelemetryService();
