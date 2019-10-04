@@ -1,13 +1,14 @@
 import {ApplicationInsights} from '@microsoft/applicationinsights-web';
 import {ReactPlugin} from '@microsoft/applicationinsights-react-js';
 
+let reactPlugin = null;
+let appInsights = null;
+
 /**
  * Create the App Insights Telemetry Service
  * @return {{reactPlugin: ReactPlugin, appInsights: Object, initialize: Function}} - Object
  */
 const createTelemetryService = () => {
-    let reactPlugin = null;
-    let appInsights = null;
 
     /**
      * Initialize the Application Insights class
@@ -16,8 +17,11 @@ const createTelemetryService = () => {
      * @return {void}
      */
     const initialize = (instrumentationKey, browserHistory) => {
-        if (!instrumentationKey || !browserHistory) {
+        if (!browserHistory) {
             throw new Error('Could not initialize Telemetry Service');
+        }
+        if (!instrumentationKey) {
+            throw new Error('Instrumentation key not provided in ./src/telemetry-provider.jsx')
         }
 
         reactPlugin = new ReactPlugin();
@@ -43,3 +47,4 @@ const createTelemetryService = () => {
 };
 
 export const ai = createTelemetryService();
+export const getAppInsights = () => appInsights;

@@ -2,7 +2,7 @@ import React from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
 import {SeverityLevel} from '@microsoft/applicationinsights-web';
 import './App.css';
-import {ai} from './TelemetryService';
+import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
 
 const Home = () => (
@@ -29,17 +29,18 @@ const Header = () => (
 );
 
 const App = () => {
+    let appInsights = null;
 
     function trackException() {
-        ai.appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
+        appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
     }
 
     function trackTrace() {
-        ai.appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
+        appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
     }
 
     function trackEvent() {
-        ai.appInsights.trackEvent({ name: 'some event' });
+        appInsights.trackEvent({ name: 'some event' });
     }
 
     function throwError() {
@@ -63,7 +64,7 @@ const App = () => {
 
     return (
       <BrowserRouter>
-        <TelemetryProvider>
+        <TelemetryProvider after={() => { appInsights = getAppInsights() }}>
           <div >
             <Header />
             <Route exact path="/" component={Home} />
