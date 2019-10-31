@@ -16,7 +16,7 @@ class TelemetryProvider extends Component {
     componentDidMount() {
         const {history} = this.props;
         const {initialized} = this.state;
-        const AppInsightsInstrumentationKey = null; // PUT YOUR KEY HERE
+        const AppInsightsInstrumentationKey = "INSTRUMENTATION_KEY"; // PUT YOUR KEY HERE
         if (!Boolean(initialized) && Boolean(AppInsightsInstrumentationKey) && Boolean(history)) {
             ai.initialize(AppInsightsInstrumentationKey, history);
             this.setState({initialized: true});
