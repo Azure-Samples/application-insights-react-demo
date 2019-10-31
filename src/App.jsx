@@ -64,7 +64,7 @@ const App = () => {
 
     return (
       <BrowserRouter>
-        <TelemetryProvider after={() => { appInsights = getAppInsights() }}>
+        <TelemetryProvider instrumentationKey="INSTRUMENTATION_KEY" after={() => { appInsights = getAppInsights() }}>
           <div >
             <Header />
             <Route exact path="/" component={Home} />
