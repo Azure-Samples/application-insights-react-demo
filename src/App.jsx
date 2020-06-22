@@ -49,7 +49,7 @@ const App = () => {
         };
 
         // This will crash the app; the error will show up in the Azure Portal
-        return foo.fielld.bar;
+        return foo.field.bar;
     }
 
     function ajaxRequest() {
