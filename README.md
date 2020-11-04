@@ -22,18 +22,26 @@ Pre-requisites:
 * PowerShell, https://github.com/PowerShell/PowerShell
 * Azure CLI, https://docs.microsoft.com/en-us/cli/azure
 
-To create a Log Analytics Workspace and linked Application Insights instance,
-run the following with the subscription where to create the resources.
+The following commands will create a Log Analytics Workspace and linked 
+Application Insights instance in your default subscription. (You can also
+pass in a different subscription if you want.)
 
 ```
 az login
-./infrastructure/Deploy-Infrastructure.ps1 'YOUR-AZURE-SUBSCRIPTION' 'demo'
+$defaultSubscription = (az account show | ConvertFrom-Json).id
+./infrastructure/deploy-infrastructure.ps1 $defaultSubscription demo
 ```
 
 The scripts will output the Instrumentation Key needed for the apps.
 
+By default the scripts will create resources in WestUS in a resource group
+named 'aird-demo' (this can be changed in the variables). Azure CLI commands
+are (mostly) idempotent, so you can re-run the scripts as needed.
+
 
 ## Client App
+
+Most of the functionality can be demonstrated with just the client.
 
 Pre-requisites:
 
@@ -71,6 +79,40 @@ dotnet run --project server/Demo.Api
 ```
 
 ## View Results
+
+Log in to Azure Portal, https://portal.azure.com/
+
+Open the Log Analytics workspace that was created. The default will be under
+Home > Resource groups > aird-demo > aird-demo-logs
+
+Select General > Logs from the left. Dismiss the Queries popup to get to an empty editor.
+
+Note that you may have to wait a bit for logs to be injested and appear in the workspace.
+
+To see the events corresponding to the buttons in the sample app, you can use the following query:
+
+```
+union App*
+| where TimeGenerated  > ago(1h)
+| sort by TimeGenerated desc
+| project TimeGenerated, Type, SeverityLevel, Name, Message, ExceptionType, DependencyType, OperationName, OperationId, ParentId, SessionId, UserId, ClientType, Id
+```
+
+You can also look at each individual type (table) of log entry, with the default columns for each type showing the relevant information.
+
+```
+AppExceptions
+| where TimeGenerated  > ago(1h)
+| sort by TimeGenerated desc
+```
+
+As well as the button events (AppDependencies, AppEvents, AppExceptions, AppTraces), you can also query automatically collected metrics (AppPageViews, AppBrowserTimings):
+
+```
+AppPageViews
+| where TimeGenerated  > ago(1h)
+| sort by TimeGenerated desc
+```
 
 
 ## Other Scripts
