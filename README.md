@@ -13,23 +13,67 @@ urlFragment: application-insights-react-demo
 [![Build Status](https://travis-ci.org/Azure-Samples/application-insights-react-demo.svg?branch=master)](https://travis-ci.org/Azure-Samples/application-insights-react-demo)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-> *Note:* Only [**App.jsx**](./src/App.jsx) was modified in this repo for the **Application Insights Demo**
 
-## Available Scripts
+
+## Infrastructure
+
+Pre-requisites:
+
+* PowerShell, https://github.com/PowerShell/PowerShell
+* Azure CLI, https://docs.microsoft.com/en-us/cli/azure
+
+To create a Log Analytics Workspace and linked Application Insights instance,
+run the following with the subscription where to create the resources.
+
+```
+az login
+./infrastructure/Deploy-Infrastructure.ps1 'YOUR-AZURE-SUBSCRIPTION' 'demo'
+```
+
+The scripts will output the Instrumentation Key needed for the apps.
+
+
+## Client App
+
+Pre-requisites:
+
+* Node.js
+
+Update the `client/src/App.jsx` file with your Instrumentation Key.
 
 In the project directory, you can run:
 
-### `npm install`
+### `npm install --prefix client`
 
 Installs dependencies. You can also use `yarn install`.
 
-### `npm start`
+### `npm start --prefix client`
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.<br>
 You will also see any lint errors in the console.
+
+
+## Server App
+
+Pre-requisites:
+
+* Dotnet Core 3.1 or higher
+
+Update the `server/Demo.Api/appsettings.json` file with your Instrumentation Key.
+
+To start the server:
+
+```
+dotnet run --project server/Demo.Api
+```
+
+## View Results
+
+
+## Other Scripts
 
 ### `npm test`
 
