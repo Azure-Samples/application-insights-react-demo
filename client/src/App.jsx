@@ -29,11 +29,9 @@ const Header = () => (
     </ul>
 );
 
-const TableData = (props) => {
-    if (!props.forecasts) return null;
-
-
-    return props.forecasts.map((forecast, index) =>
+const TableData = (props) => !props.forecasts 
+    ? null
+    : props.forecasts.map((forecast, index) =>
         (
             <tr key={forecast.date}>
                 <td>{forecast.date}</td>
@@ -42,7 +40,6 @@ const TableData = (props) => {
             </tr>
         )
     );
-}
 
 const App = () => {
     const [appInsights, setAppInsights] = useState();
@@ -101,16 +98,13 @@ const App = () => {
 
     function callServer() {
         fetch('weatherforecast')
-            .then(response => {
-                if (!response.ok) {
-                    Promise.reject(`API error: ${response.statusText}`);
-                }
-                return response.text()
-                    .then(text => {
-                        console.log('Text=' + text);
-                        let data = JSON.parse(text);
-                        setState({ ...state, forecasts: data })
-                    });
+            .then(response =>
+                response.ok
+                    ? response.json()
+                    : Promise.reject(`API error: ${response.statusText}`)
+            )
+            .then(data => {
+                setState({ ...state, forecasts: data })
             });
     }
 
