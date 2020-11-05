@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
 import {SeverityLevel} from '@microsoft/applicationinsights-web';
 import './App.css';
 import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
+import { Initialization } from '@microsoft/applicationinsights-web/dist-esm/Initialization';
 
 const Home = () => (
     <div>
@@ -28,8 +29,36 @@ const Header = () => (
     </ul>
 );
 
+const TableData = (props) => {
+    if (!props.forecasts) return null;
+
+
+    return props.forecasts.map((forecast, index) =>
+        (
+            <tr key={forecast.date}>
+                <td>{forecast.date}</td>
+                <td>{forecast.temperatureC}</td>
+                <td>{forecast.summary}</td>
+            </tr>
+        )
+    );
+}
+
 const App = () => {
-    let appInsights = null;
+    const [appInsights, setAppInsights] = useState();
+
+    const [state, setState] = useState({ 
+        counter: 0,
+        forecasts: []
+    });
+
+    function initAppInsights(){
+        if (! appInsights) {
+            console.log('Init appInsights');
+            const newAppInsights = getAppInsights();
+            setAppInsights(newAppInsights);
+        }
+    }
 
     function trackException() {
         appInsights.trackException({ error: new Error('some error'), severityLevel: SeverityLevel.Error });
@@ -62,9 +91,32 @@ const App = () => {
         fetch('https://httpbin.org/status/200');
     }
 
+    function increaseCounter() {
+        const newCounter = state.counter + 1;
+        setState({ ...state, counter: newCounter });
+        let properties = { counter: newCounter };
+        appInsights.trackTrace({ message: `Counter increased to ${newCounter}`, 
+            severityLevel: SeverityLevel.Information, properties });
+    }
+
+    function callServer() {
+        fetch('weatherforecast')
+            .then(response => {
+                if (!response.ok) {
+                    Promise.reject(`API error: ${response.statusText}`);
+                }
+                return response.text()
+                    .then(text => {
+                        console.log('Text=' + text);
+                        let data = JSON.parse(text);
+                        setState({ ...state, forecasts: data })
+                    });
+            });
+    }
+
     return (
       <BrowserRouter>
-        <TelemetryProvider instrumentationKey="INSTRUMENTATION_KEY" after={() => { appInsights = getAppInsights() }}>
+        <TelemetryProvider instrumentationKey="ad503eb8-e1c9-42df-9c5a-debed20372ef" after={() => { initAppInsights() }}>
           <div >
             <Header />
             <Route exact path="/" component={Home} />
@@ -77,6 +129,25 @@ const App = () => {
             <button onClick={throwError}>Autocollect an Error</button>
             <button onClick={ajaxRequest}>Autocollect a Dependency (XMLHttpRequest)</button>
             <button onClick={fetchRequest}>Autocollect a dependency (Fetch)</button>
+            <button onClick={increaseCounter}>Increase counter</button>
+            <button onClick={callServer}>Call server</button>
+          </div>
+          <div>
+            <span>Counter: {state.counter}</span>
+          </div>
+          <div>
+            <table className='table table-striped' aria-labelledby="tabelLabel">
+              <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Temp. (C)</th>
+                    <th>Summary</th>
+                </tr>
+              </thead>
+              <tbody>
+                <TableData forecasts={state.forecasts} />
+              </tbody>
+            </table>
           </div>
         </TelemetryProvider>
       </BrowserRouter>
