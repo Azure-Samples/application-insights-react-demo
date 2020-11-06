@@ -42,6 +42,12 @@ const createTelemetryService = () => {
         });
 
         appInsights.loadAppInsights();
+
+        var telemetryInitializer = (envelope) => {
+            // patch span as spanId (although not yet supported)
+            envelope.tags["ai.operation.spanId"] = appInsights.context.telemetryTrace.spanID;
+        }
+        appInsights.addTelemetryInitializer(telemetryInitializer);
     };
 
     return {reactPlugin, appInsights, initialize};

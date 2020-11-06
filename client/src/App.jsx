@@ -46,6 +46,8 @@ const TableData = (props) => !props.forecasts
     );
 
 const App = () => {
+    const categoryName = 'Demo.Client.App';
+
     const [appInsights, setAppInsights] = useState();
 
     const [state, setState] = useState({ 
@@ -59,6 +61,34 @@ const App = () => {
             const newAppInsights = getAppInsights();
             setAppInsights(newAppInsights);
         }
+    }
+
+    function startActivity(operationName, parentTraceId, parentSpanId) {
+        const traceId = parentTraceId ?? Util.generateW3CId();
+        const parentId = parentSpanId ?? '0000000000000000';
+        const telementryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
+
+        // patch in the span ID for this operation
+        const spanId = Util.generateW3CId().substring(0, 16);
+        telementryTraceContext.spanID = spanId;
+        // until spanId is actually supported, overwrite name
+        telementryTraceContext.name = spanId;
+
+        // set the context
+        appInsights.context.telemetryTrace = telementryTraceContext;
+        return telementryTraceContext;
+    }
+
+    function addCategory(properties) {
+        properties.CategoryName = categoryName;
+        return properties;
+    }
+
+    function addTraceContext(properties) {
+        properties.TraceId = appInsights.context.telemetryTrace.traceID;
+        properties.SpanId = appInsights.context.telemetryTrace.spanID;
+        properties.ParentId = appInsights.context.telemetryTrace.parentID;
+        return properties;
     }
 
     function trackException() {
@@ -94,11 +124,8 @@ const App = () => {
     }
 
     function increaseCounter() {
-        // start new trace
-        const traceId = Util.generateW3CId();
-        const spanId = Util.generateW3CId().substring(0, 16);
-        appInsights.context.telemetryTrace = new TelemetryTrace(traceId, '0000000000000000', spanId)
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, name=${appInsights.context.telemetryTrace.name}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        startActivity('increaseCounter');
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanId}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
         const newCounter = state.counter + 1;
         setState({ ...state, counter: newCounter });
@@ -108,13 +135,11 @@ const App = () => {
     }
 
     function callServer() {
-        // start new trace
-        const traceId = Util.generateW3CId();
-        const spanId = Util.generateW3CId().substring(0, 16);
-        appInsights.context.telemetryTrace = new TelemetryTrace(traceId, '0000000000000000', spanId)
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, name=${appInsights.context.telemetryTrace.name}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        startActivity('callServer');
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanId}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
-        appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information });
+        const properties = addTraceContext(addCategory({}));
+        appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information, properties });
         fetch('weatherforecast')
             .then(response =>
                 response.ok
@@ -122,7 +147,7 @@ const App = () => {
                     : Promise.reject(`API error: ${response.statusText}`)
             )
             .then(data => {
-                const properties = { forecastCount: data.length }
+                const properties = addTraceContext(addCategory({ forecastCount: data.length }));
                 appInsights.trackTrace({ message: `CLIENT: Weather forecast received with ${data.length} items`, 
                     severityLevel: SeverityLevel.Information, properties });
                 setState({ ...state, forecasts: data })
