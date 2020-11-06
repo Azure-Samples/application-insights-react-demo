@@ -1,7 +1,7 @@
 /*global globalConfig*/
 import React, { useState } from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
-import {SeverityLevel} from '@microsoft/applicationinsights-web';
+import {SeverityLevel, Util} from '@microsoft/applicationinsights-web';
 import './App.css';
 import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
@@ -65,6 +65,7 @@ const App = () => {
     }
 
     function trackTrace() {
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
         appInsights.trackTrace({ message: 'some trace', severityLevel: SeverityLevel.Information });
     }
 
@@ -92,6 +93,11 @@ const App = () => {
     }
 
     function increaseCounter() {
+        // start new trace
+        appInsights.context.telemetryTrace.traceID = Util.generateW3CId()
+        appInsights.context.telemetryTrace.parentID = '0000000000000000'
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        
         const newCounter = state.counter + 1;
         setState({ ...state, counter: newCounter });
         let properties = { counter: newCounter };
@@ -100,6 +106,11 @@ const App = () => {
     }
 
     function callServer() {
+        // start new trace
+        appInsights.context.telemetryTrace.traceID = Util.generateW3CId()
+        appInsights.context.telemetryTrace.parentID = '0000000000000000'
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+
         appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information });
         fetch('weatherforecast')
             .then(response =>
