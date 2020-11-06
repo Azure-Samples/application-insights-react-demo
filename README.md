@@ -106,6 +106,14 @@ AppExceptions
 | sort by TimeGenerated desc
 ```
 
+If you are looking at traces, you can exclude the Microsoft auto-generate ones:
+
+```
+AppTraces
+| where TimeGenerated  > ago(1h) and Properties.CategoryName !startswith "Microsoft"
+| sort by TimeGenerated desc
+```
+
 As well as the button events (AppDependencies, AppEvents, AppExceptions, AppTraces), you can also query automatically collected metrics (AppPageViews, AppBrowserTimings):
 
 ```
