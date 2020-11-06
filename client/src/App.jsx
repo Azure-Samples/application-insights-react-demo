@@ -1,3 +1,4 @@
+/*global globalConfig*/
 import React, { useState } from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
 import {SeverityLevel} from '@microsoft/applicationinsights-web';
@@ -5,6 +6,8 @@ import './App.css';
 import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
 import { Initialization } from '@microsoft/applicationinsights-web/dist-esm/Initialization';
+
+const instrumentationKey = globalConfig.ApplicationInsights.InstrumentationKey;
 
 const Home = () => (
     <div>
@@ -114,7 +117,7 @@ const App = () => {
 
     return (
       <BrowserRouter>
-        <TelemetryProvider instrumentationKey="INSTRUMENTATION_KEY" after={() => { initAppInsights() }}>
+        <TelemetryProvider instrumentationKey={instrumentationKey} after={() => { initAppInsights() }}>
           <div >
             <Header />
             <Route exact path="/" component={Home} />

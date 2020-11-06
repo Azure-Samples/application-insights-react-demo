@@ -47,7 +47,7 @@ Pre-requisites:
 
 * Node.js
 
-Update the `client/src/App.jsx` file with your Instrumentation Key.
+Update the `client/public/global-config.js` file with your Instrumentation Key.
 
 In the project directory, you can run:
 
