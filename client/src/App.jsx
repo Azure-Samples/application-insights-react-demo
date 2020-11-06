@@ -97,6 +97,7 @@ const App = () => {
     }
 
     function callServer() {
+        appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information });
         fetch('weatherforecast')
             .then(response =>
                 response.ok
@@ -104,6 +105,9 @@ const App = () => {
                     : Promise.reject(`API error: ${response.statusText}`)
             )
             .then(data => {
+                const properties = { forecastCount: data.length }
+                appInsights.trackTrace({ message: `CLIENT: Weather forecast received with ${data.length} items`, 
+                    severityLevel: SeverityLevel.Information, properties });
                 setState({ ...state, forecasts: data })
             });
     }
