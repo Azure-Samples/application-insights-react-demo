@@ -4,5 +4,5 @@ node_js:
   - "stable"
 
 script:
-  - cd client
-  - npm run test
+  - npm --prefix client install
+  - npm --prefix client run test
