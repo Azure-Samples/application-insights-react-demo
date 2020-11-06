@@ -1,4 +1,4 @@
-import {ApplicationInsights} from '@microsoft/applicationinsights-web';
+import {ApplicationInsights, DistributedTracingModes} from '@microsoft/applicationinsights-web';
 import {ReactPlugin} from '@microsoft/applicationinsights-react-js';
 
 let reactPlugin = null;
@@ -31,6 +31,7 @@ const createTelemetryService = () => {
                 instrumentationKey: instrumentationKey,
                 maxBatchInterval: 0,
                 disableFetchTracking: false,
+                distributedTracingMode: DistributedTracingModes.W3C,
                 extensions: [reactPlugin],
                 extensionConfig: {
                     [reactPlugin.identifier]: {
