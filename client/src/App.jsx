@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
 import {SeverityLevel, Util} from '@microsoft/applicationinsights-web';
+import {TelemetryTrace} from '@microsoft/applicationinsights-properties-js';
 import './App.css';
 import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
@@ -94,10 +95,11 @@ const App = () => {
 
     function increaseCounter() {
         // start new trace
-        appInsights.context.telemetryTrace.traceID = Util.generateW3CId()
-        appInsights.context.telemetryTrace.parentID = '0000000000000000'
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
-        
+        const traceId = Util.generateW3CId();
+        const spanId = Util.generateW3CId().substring(0, 16);
+        appInsights.context.telemetryTrace = new TelemetryTrace(traceId, '0000000000000000', spanId)
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, name=${appInsights.context.telemetryTrace.name}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+
         const newCounter = state.counter + 1;
         setState({ ...state, counter: newCounter });
         let properties = { counter: newCounter };
@@ -107,9 +109,10 @@ const App = () => {
 
     function callServer() {
         // start new trace
-        appInsights.context.telemetryTrace.traceID = Util.generateW3CId()
-        appInsights.context.telemetryTrace.parentID = '0000000000000000'
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        const traceId = Util.generateW3CId();
+        const spanId = Util.generateW3CId().substring(0, 16);
+        appInsights.context.telemetryTrace = new TelemetryTrace(traceId, '0000000000000000', spanId)
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, name=${appInsights.context.telemetryTrace.name}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
         appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information });
         fetch('weatherforecast')
