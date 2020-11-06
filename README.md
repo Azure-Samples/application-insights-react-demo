@@ -106,12 +106,15 @@ AppExceptions
 | sort by TimeGenerated desc
 ```
 
-If you are looking at traces, you can exclude the Microsoft auto-generate ones:
+If you are looking at traces, you can exclude the Microsoft auto-generate ones, and tweak the columns to show the distributed
+Trace Context correlation including spans and parent spans. The Increase Counter and Call Server functions demonstrate tracing,
+however note that the built in correlation injection does not inject the parent span (it creates a random parent).
 
 ```
 AppTraces
 | where TimeGenerated  > ago(1h) and Properties.CategoryName !startswith "Microsoft"
 | sort by TimeGenerated desc
+| project TimeGenerated, ClientType, Message, SeverityLevel, Properties.CategoryName, Properties.TraceId, Properties.SpanId, Properties.ParentId, OperationId, OperationName, ParentId, SessionId, UserId
 ```
 
 As well as the button events (AppDependencies, AppEvents, AppExceptions, AppTraces), you can also query automatically collected metrics (AppPageViews, AppBrowserTimings):

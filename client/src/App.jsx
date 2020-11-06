@@ -63,9 +63,9 @@ const App = () => {
         }
     }
 
-    function startActivity(operationName, parentTraceId, parentSpanId) {
-        const traceId = parentTraceId ?? Util.generateW3CId();
-        const parentId = parentSpanId ?? '0000000000000000';
+    function startActivity(operationName, parentActivity) {
+        const traceId = parentActivity !== undefined ? parentActivity.traceID : Util.generateW3CId();
+        const parentId = parentActivity !== undefined ? parentActivity.spanID : '0000000000000000';
         const telementryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
 
         // patch in the span ID for this operation
@@ -125,18 +125,30 @@ const App = () => {
 
     function increaseCounter() {
         startActivity('increaseCounter');
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanId}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+
+        const properties = addTraceContext(addCategory({}));
+        appInsights.trackTrace({ message: `Counter increase called`, severityLevel: SeverityLevel.Information, properties });
 
         const newCounter = state.counter + 1;
         setState({ ...state, counter: newCounter });
-        let properties = { counter: newCounter };
-        appInsights.trackTrace({ message: `Counter increased to ${newCounter}`, 
+
+        afterIncreaseCounter();
+    }
+
+    function afterIncreaseCounter() {
+        // Child activity (child span)
+        startActivity('afterIncreaseCounter', appInsights.context.telemetryTrace);
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+
+        const properties = addTraceContext(addCategory({ counter: state.counter }));
+        appInsights.trackTrace({ message: `Counter increased to ${state.counter}`, 
             severityLevel: SeverityLevel.Information, properties });
     }
 
     function callServer() {
         startActivity('callServer');
-        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanId}, parentID=${appInsights.context.telemetryTrace.parentID}`)
+        console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
         const properties = addTraceContext(addCategory({}));
         appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information, properties });
