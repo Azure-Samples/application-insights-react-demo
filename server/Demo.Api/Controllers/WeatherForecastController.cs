@@ -42,18 +42,18 @@ namespace Demo.Api.Controllers
         {
             var span = new Activity(nameof(GenerateRandomWeather));
             span.SetParentId(Activity.Current.TraceId, Activity.Current.SpanId, Activity.Current.ActivityTraceFlags);
-            
-            using var scope = _logger.BeginScope(new Dictionary<string, object>
-            {
-                ["TraceId"] = span.TraceId,
-                ["SpanId"] = span.SpanId, 
-                ["ParentId"] = span.ParentSpanId
-            });
             span.Start();
 
+            // Microsoft.Extensions.Logging uses scopes to report extra data, such as the current span.
+            // ASP.NET creates and sets scope properties, so if don't change here, the values will be used.
+            
+            using var scope = _logger.BeginScope("TraceId={TraceId}, SpanId={SpanId}, ParentId={ParentId}",
+                span.TraceId, span.SpanId, span.ParentSpanId);
             
             // App Insights treats traces as children of the current span, so records the
             // current span-id in ParentId for traces.
+            
+            // If don't start a new operation here the previous values will be used.
             
             // StartOperation generates AppDependency with the previous span-id (span.ParentId) as ParentId,
             // and the new span-id (span.SpanId) as the Id, then sets the App Insights
@@ -76,7 +76,7 @@ namespace Demo.Api.Controllers
             finally
             {
                 _telemetryClient.StopOperation(operation);
-                span.Stop();
+                //span.Stop();
             }
         }
     }

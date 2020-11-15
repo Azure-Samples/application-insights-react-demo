@@ -1,12 +1,11 @@
 /*global globalConfig*/
 import React, { useState } from 'react';
 import {BrowserRouter, Link, Route} from 'react-router-dom';
-import {SeverityLevel, Util, ITraceTelemetry} from '@microsoft/applicationinsights-web';
+import {SeverityLevel, Util} from '@microsoft/applicationinsights-web';
 import {TelemetryTrace} from '@microsoft/applicationinsights-properties-js';
 import './App.css';
 import { getAppInsights } from './TelemetryService';
 import TelemetryProvider from './telemetry-provider';
-import { Initialization } from '@microsoft/applicationinsights-web/dist-esm/Initialization';
 
 const instrumentationKey = globalConfig.ApplicationInsights.InstrumentationKey;
 
