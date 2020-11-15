@@ -47,14 +47,23 @@ const createTelemetryService = () => {
             const telemetryTraceContext = appInsights.context?.telemetryTrace;
             if (telemetryTraceContext !== undefined) {
                 // Add trace properties in the same format used by Microsoft.Extensions.Logging
-                envelope.baseData = envelope.baseData ?? {};
-                envelope.baseData.properties = envelope.baseData.properties ?? {};
-                envelope.baseData.properties.TraceId = telemetryTraceContext.traceID ?? '';
-                // AppInsights treats traces as children of the current span, so stores 
-                // current span-id in the parentID field.
-                // The startSpan() function then stores parent-id in the previousParentID field.
-                envelope.baseData.properties.SpanId = telemetryTraceContext.parentID ?? '';
-                envelope.baseData.properties.ParentId = telemetryTraceContext.previousParentID ?? '';
+                if (envelope.name === 'Microsoft.ApplicationInsights.{0}.RemoteDependency') {
+                    envelope.baseData = envelope.baseData ?? {};
+                    envelope.baseData.properties = envelope.baseData.properties ?? {};
+                    envelope.baseData.properties.TraceId = telemetryTraceContext.traceID ?? '';
+                    // For AppDependency, parentID is the parent and the span need to be parsed from ID
+                    envelope.baseData.properties.SpanId = envelope.baseData.id?.slice(-17, -1) ?? '';
+                    envelope.baseData.properties.ParentId = telemetryTraceContext.parentID ?? '';    
+                } else {
+                    envelope.baseData = envelope.baseData ?? {};
+                    envelope.baseData.properties = envelope.baseData.properties ?? {};
+                    envelope.baseData.properties.TraceId = telemetryTraceContext.traceID ?? '';
+                    // AppInsights treats traces as children of the current span, so stores 
+                    // current span-id in the parentID field.
+                    // The startSpan() function then stores parent-id in the previousParentID field.
+                    envelope.baseData.properties.SpanId = telemetryTraceContext.parentID ?? '';
+                    envelope.baseData.properties.ParentId = telemetryTraceContext.previousParentID ?? '';    
+                }
             }
         }
         appInsights.addTelemetryInitializer(telemetryTraceContextInitializer);
