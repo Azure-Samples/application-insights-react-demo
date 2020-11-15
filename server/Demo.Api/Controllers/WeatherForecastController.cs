@@ -47,7 +47,7 @@ namespace Demo.Api.Controllers
             {
                 ["TraceId"] = span.TraceId,
                 ["SpanId"] = span.SpanId, 
-                ["ParentId"] = span.ParentId
+                ["ParentId"] = span.ParentSpanId
             });
             span.Start();
 
