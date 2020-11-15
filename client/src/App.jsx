@@ -63,46 +63,22 @@ const App = () => {
         }
     }
 
-    function startActivity2(operationName, parentActivity) {
-        /*
-        const traceId = parentActivity !== undefined ? parentActivity.traceID : Util.generateW3CId();
-        const parentId = parentActivity !== undefined ? parentActivity.spanID : '0000000000000000';
-        const telementryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
-
-        // patch in the span ID for this operation
-        const spanId = Util.generateW3CId().substring(0, 16);
-        telementryTraceContext.spanID = spanId;
-        // until spanId is actually supported, overwrite name
-        telementryTraceContext.name = spanId;
-
-        // set the context
-        appInsights.context.telemetryTrace = telementryTraceContext;
-        return telementryTraceContext;
-        */
-    }
-
-    function startActivity(operationName, parentTelemetryTraceContext) {
+    function startSpan(spanName, parentTelemetryTraceContext) {
         const traceId = parentTelemetryTraceContext?.traceID ?? Util.generateW3CId();
-        const spanId = Util.generateW3CId().substring(0, 16);
-        const parentId = parentTelemetryTraceContext?.spanID ?? '0000000000000000';
+        const newSpanId = Util.generateW3CId().substring(0, 16);
+        const parentSpanId = parentTelemetryTraceContext?.parentID ?? '0000000000000000';
 
-        const telemetryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
-        telemetryTraceContext.spanID = spanId;
+        // AppInsights treats traces as children of the current span, so stores current span-id in the parentID field.
+        const telemetryTraceContext = new TelemetryTrace(traceId, newSpanId, spanName);
+        // Also add the parent-id (ID of the parent of this span) in the previousParentID field.
+        telemetryTraceContext.previousParentID = parentSpanId;
 
         appInsights.context.telemetryTrace = telemetryTraceContext;
     }
 
     function addCategory(properties) {
+        // Add trace properties in the same format used by Microsoft.Extensions.Logging
         properties.CategoryName = categoryName;
-        return properties;
-    }
-
-    function addTraceContext(properties) {
-        /*
-        properties.TraceId = appInsights.context.telemetryTrace.traceID;
-        properties.SpanId = appInsights.context.telemetryTrace.spanID;
-        properties.ParentId = appInsights.context.telemetryTrace.parentID;
-        */
         return properties;
     }
 
@@ -139,10 +115,10 @@ const App = () => {
     }
 
     function increaseCounter() {
-        startActivity('increaseCounter');
+        startSpan('increaseCounter');
         console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
-        const properties = addTraceContext(addCategory({}));
+        const properties = addCategory({});
         appInsights.trackTrace({ message: `Counter increase called`, severityLevel: SeverityLevel.Information, properties });
 
         const newCounter = state.counter + 1;
@@ -153,19 +129,19 @@ const App = () => {
 
     function afterIncreaseCounter() {
         // Child activity (child span)
-        startActivity('afterIncreaseCounter', appInsights.context.telemetryTrace);
+        startSpan('afterIncreaseCounter', appInsights.context.telemetryTrace);
         console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
-        const properties = addTraceContext(addCategory({ counter: state.counter }));
+        const properties = addCategory({ counter: state.counter });
         appInsights.trackTrace({ message: `Counter increased to ${state.counter}`, 
             severityLevel: SeverityLevel.Information, properties });
     }
 
     function callServer() {
-        startActivity('callServer');
+        startSpan('callServer');
         console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
-        const properties = addTraceContext(addCategory({}));
+        const properties = addCategory({});
         appInsights.trackTrace({ message: 'CLIENT: Fetching weather forecast', severityLevel: SeverityLevel.Information, properties });
         fetch('weatherforecast')
             .then(response =>
@@ -174,7 +150,7 @@ const App = () => {
                     : Promise.reject(`API error: ${response.statusText}`)
             )
             .then(data => {
-                const properties = addTraceContext(addCategory({ forecastCount: data.length }));
+                const properties = addCategory({ forecastCount: data.length });
                 appInsights.trackTrace({ message: `CLIENT: Weather forecast received with ${data.length} items`, 
                     severityLevel: SeverityLevel.Information, properties });
                 setState({ ...state, forecasts: data })
@@ -184,7 +160,7 @@ const App = () => {
     function trackSequence() {
         console.log('trackSequence')
 
-        startActivity('trackSequence');
+        startSpan('trackSequence');
         console.log(`traceID=${appInsights.context.telemetryTrace.traceID}, spanId=${appInsights.context.telemetryTrace.spanID}, parentID=${appInsights.context.telemetryTrace.parentID}`)
 
         // ITraceTelemetry

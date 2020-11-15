@@ -43,19 +43,18 @@ const createTelemetryService = () => {
 
         appInsights.loadAppInsights();
 
-        //var telemetryInitializer = (envelope) => {
-        //    // patch span as spanId (although not yet supported)
-        //    envelope.tags["ai.operation.spanId"] = appInsights.context.telemetryTrace.spanID;
-        //}
-
         var telemetryTraceContextInitializer = (envelope) => {
             const telemetryTraceContext = appInsights.context?.telemetryTrace;
             if (telemetryTraceContext !== undefined) {
+                // Add trace properties in the same format used by Microsoft.Extensions.Logging
                 envelope.baseData = envelope.baseData ?? {};
                 envelope.baseData.properties = envelope.baseData.properties ?? {};
                 envelope.baseData.properties.TraceId = telemetryTraceContext.traceID ?? '';
-                envelope.baseData.properties.SpanId = telemetryTraceContext.spanID ?? '';
-                envelope.baseData.properties.ParentId = telemetryTraceContext.parentID ?? '';
+                // AppInsights treats traces as children of the current span, so stores 
+                // current span-id in the parentID field.
+                // The startSpan() function then stores parent-id in the previousParentID field.
+                envelope.baseData.properties.SpanId = telemetryTraceContext.parentID ?? '';
+                envelope.baseData.properties.ParentId = telemetryTraceContext.previousParentID ?? '';
             }
         }
         appInsights.addTelemetryInitializer(telemetryTraceContextInitializer);
