@@ -63,7 +63,8 @@ const App = () => {
         }
     }
 
-    function startActivity(operationName, parentActivity) {
+    function startActivity2(operationName, parentActivity) {
+        /*
         const traceId = parentActivity !== undefined ? parentActivity.traceID : Util.generateW3CId();
         const parentId = parentActivity !== undefined ? parentActivity.spanID : '0000000000000000';
         const telementryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
@@ -77,6 +78,18 @@ const App = () => {
         // set the context
         appInsights.context.telemetryTrace = telementryTraceContext;
         return telementryTraceContext;
+        */
+    }
+
+    function startActivity(operationName, parentTelemetryTraceContext) {
+        const traceId = parentTelemetryTraceContext?.traceID ?? Util.generateW3CId();
+        const spanId = Util.generateW3CId().substring(0, 16);
+        const parentId = parentTelemetryTraceContext?.spanID ?? '0000000000000000';
+
+        const telemetryTraceContext = new TelemetryTrace(traceId, parentId, operationName);
+        telemetryTraceContext.spanID = spanId;
+
+        appInsights.context.telemetryTrace = telemetryTraceContext;
     }
 
     function addCategory(properties) {
@@ -85,9 +98,11 @@ const App = () => {
     }
 
     function addTraceContext(properties) {
+        /*
         properties.TraceId = appInsights.context.telemetryTrace.traceID;
         properties.SpanId = appInsights.context.telemetryTrace.spanID;
         properties.ParentId = appInsights.context.telemetryTrace.parentID;
+        */
         return properties;
     }
 

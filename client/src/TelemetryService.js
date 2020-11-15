@@ -43,11 +43,22 @@ const createTelemetryService = () => {
 
         appInsights.loadAppInsights();
 
-        var telemetryInitializer = (envelope) => {
-            // patch span as spanId (although not yet supported)
-            envelope.tags["ai.operation.spanId"] = appInsights.context.telemetryTrace.spanID;
+        //var telemetryInitializer = (envelope) => {
+        //    // patch span as spanId (although not yet supported)
+        //    envelope.tags["ai.operation.spanId"] = appInsights.context.telemetryTrace.spanID;
+        //}
+
+        var telemetryTraceContextInitializer = (envelope) => {
+            const telemetryTraceContext = appInsights.context?.telemetryTrace;
+            if (telemetryTraceContext !== undefined) {
+                envelope.baseData = envelope.baseData ?? {};
+                envelope.baseData.properties = envelope.baseData.properties ?? {};
+                envelope.baseData.properties.TraceId = telemetryTraceContext.traceID ?? '';
+                envelope.baseData.properties.SpanId = telemetryTraceContext.spanID ?? '';
+                envelope.baseData.properties.ParentId = telemetryTraceContext.parentID ?? '';
+            }
         }
-        appInsights.addTelemetryInitializer(telemetryInitializer);
+        appInsights.addTelemetryInitializer(telemetryTraceContextInitializer);
     };
 
     return {reactPlugin, appInsights, initialize};
